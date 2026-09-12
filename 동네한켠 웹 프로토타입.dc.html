@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#EFEAE0;font-family:"Noto Sans KR",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:#E06A50}a:hover{color:#c4543b}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+@keyframes pop{from{opacity:0;transform:translateY(14px) scale(.97)}to{opacity:1;transform:none}}
+@keyframes slidein{from{opacity:0;transform:translateX(24px)}to{opacity:1;transform:none}}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+::-webkit-scrollbar{width:8px}::-webkit-scrollbar-thumb{background:#DED6C6;border-radius:4px}
+</style></helmet>
+
+<div style="display:flex;flex-direction:column;height:100vh;background:#FFFDF8">
+
+  <div style="display:flex;align-items:center;gap:14px;padding:13px 24px;border-bottom:1px solid #EDE6D8;flex:none">
+    <img src="uploads/KakaoTalk_20260913_020824622.png" alt="동네한켠" style="height:42px;width:auto;display:block"></img>
+    <div style="display:flex;gap:6px;margin-left:22px">
+      <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="3">
+        <div onClick="{{ t.go }}" style="{{ t.style }}" style-hover="color:#2E2A24">{{ t.label }}</div>
+      </sc-for>
+    </div>
+    <div style="flex:1"></div>
+    <div onClick="{{ openForm }}" style="display:flex;align-items:center;gap:9px;background:#2E2A24;color:#fff;border-radius:999px;padding:9px 17px 9px 12px;font:700 13px 'Noto Sans KR';cursor:pointer;user-select:none" style-hover="background:#443E35">
+      <div style="width:22px;height:26px;position:relative">
+        <div style="position:absolute;left:2px;top:1px;width:18px;height:17px;border-radius:9px 9px 3px 3px;background:#F0806A"></div>
+        <div style="position:absolute;left:6px;top:7px;width:11px;height:3px;border-radius:2px;background:#7E3B2C"></div>
+        <div style="position:absolute;left:8px;top:17px;width:6px;height:9px;background:#D96C56"></div>
+      </div>
+      기억 제보하기
+    </div>
+  </div>
+
+  <sc-if value="{{ isMap }}" hint-placeholder-val="{{ true }}">
+  <div style="display:flex;flex:1;min-height:0">
+
+    <div style="width:248px;flex:none;border-right:1px solid #EDE6D8;padding:18px;display:flex;flex-direction:column;gap:14px;overflow-y:auto">
+      <div style="display:flex;align-items:baseline;gap:7px"><span style="font:700 13px 'Noto Sans KR';color:#2E2A24">카테고리</span><span style="font:400 11px 'Noto Sans KR';color:#9A9384">눌러서 켜고 끄기</span></div>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <sc-for list="{{ cats }}" as="c" hint-placeholder-count="4">
+          <div onClick="{{ c.toggle }}" style="{{ c.style }}" style-hover="filter:brightness(.98)">
+            <span style="{{ c.heart }}">♥</span>{{ c.label }}<span style="flex:1"></span><span style="color:#9A9384;font-size:11.5px">{{ c.count }}</span>
+          </div>
+        </sc-for>
+      </div>
+      <sc-if value="{{ courseOn }}" hint-placeholder-val="{{ false }}">
+        <div style="border:1px solid #F2734E;background:#FDEDE7;border-radius:12px;padding:11px 12px;animation:fade .25s both">
+          <div style="font:400 10.5px 'Noto Sans KR';color:#C9553A">코스 보기 중</div>
+          <div style="font:700 13px 'Noto Sans KR';color:#2E2A24;margin-top:3px">{{ courseName }}</div>
+          <div onClick="{{ clearCourse }}" style="margin-top:8px;display:inline-block;background:#fff;border-radius:999px;padding:5px 11px;font:500 11.5px 'Noto Sans KR';color:#6E675A;cursor:pointer">코스 해제</div>
+        </div>
+      </sc-if>
+      <div style="flex:1"></div>
+      <div style="font:400 11px/1.7 'Noto Sans KR';color:#A9A294;word-break:keep-all">한 장소에 여러 사람의 기억이 쌓이면 마커에 기억 개수가 표시됩니다.</div>
+    </div>
+
+    <div data-map-pane="1" style="flex:1;min-width:0;position:relative;background:#EFE9DC;overflow:hidden">
+      <div style="{{ mapStyle }}">
+        <svg viewBox="0 0 620 680" preserveAspectRatio="xMidYMid meet" style="position:absolute;inset:0;width:100%;height:100%;display:block">
+        <rect x="-400" y="-400" width="1420" height="1480" fill="#EFE9DC"></rect>
+        <path d="M250 40 C380 10 560 70 600 180 C630 270 500 330 380 300 C250 270 150 120 250 40 Z" fill="#DBE5CE"></path>
+        <path d="M300 80 C400 60 520 110 540 180 C555 235 460 270 380 250 C300 230 240 110 300 80 Z" fill="#CFDCC0"></path>
+        <path d="M-20 420 C80 350 210 380 270 470 C320 545 230 650 110 640 C0 630 -60 490 -20 420 Z" fill="#DBE5CE"></path>
+        <path d="M-20 330 C110 300 190 370 300 350 C400 332 470 380 640 360" fill="none" stroke="#BFD6E2" stroke-width="11" stroke-linecap="round"></path>
+        <path d="M-20 250 C120 230 200 300 320 280 C430 262 520 210 640 230" fill="none" stroke="#FFFFFF" stroke-width="12" stroke-linecap="round"></path>
+        <path d="M180 -10 C210 130 150 250 200 350 C250 450 200 570 230 700" fill="none" stroke="#FFFFFF" stroke-width="9" stroke-linecap="round"></path>
+        <path d="M640 170 C520 190 450 260 400 350 C350 440 360 560 340 700" fill="none" stroke="#F6F1E6" stroke-width="8" stroke-linecap="round"></path>
+        <text x="396" y="150" font-family="Noto Sans KR" font-size="14" font-weight="500" fill="#8E8877">북악산</text>
+        <text x="60" y="530" font-family="Noto Sans KR" font-size="14" font-weight="500" fill="#8E8877">인왕산</text>
+        <text x="486" y="322" font-family="Noto Sans KR" font-size="16" font-weight="700" fill="#7A7365">평창동</text>
+        <text x="286" y="196" font-family="Noto Sans KR" font-size="16" font-weight="700" fill="#7A7365">신영동</text>
+        <text x="424" y="470" font-family="Noto Sans KR" font-size="16" font-weight="700" fill="#7A7365">부암동</text>
+        <text x="60" y="368" font-family="Noto Sans KR" font-size="16" font-weight="700" fill="#7A7365">홍제동</text>
+        <text x="24" y="316" font-family="Noto Sans KR" font-size="12" fill="#A9B9C4">홍제천</text>
+        </svg>
+        <sc-for list="{{ markers }}" as="m" hint-placeholder-count="8">
+          <div onClick="{{ m.select }}" style="{{ m.wrap }}">
+            <div style="{{ m.float }}">
+              <div style="{{ m.tile }}">
+                <div style="{{ m.photo }}">{{ m.order }}</div>
+                <div style="{{ m.badge }}">{{ m.count }}</div>
+              </div>
+              <div style="{{ m.tail }}"></div>
+              <div style="{{ m.label }}">{{ m.name }}</div>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+
+      <div style="position:absolute;left:16px;top:16px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <div style="background:rgba(255,255,255,.94);border-radius:999px;padding:7px 14px;font:500 12px 'Noto Sans KR';color:#544D42;box-shadow:0 3px 10px rgba(90,80,60,.12)">{{ visibleLabel }}</div>
+        <div onClick="{{ resetView }}" style="background:rgba(255,255,255,.8);border-radius:999px;padding:7px 13px;font:500 12px 'Noto Sans KR';color:#8A8474;cursor:pointer;box-shadow:0 3px 10px rgba(90,80,60,.1)" style-hover="background:#FFF">필터 초기화</div>
+        <sc-if value="{{ noSel }}" hint-placeholder-val="{{ true }}">
+          <div style="display:flex;align-items:center;gap:9px;background:rgba(255,253,248,.96);border-radius:999px;padding:7px 14px 7px 8px;box-shadow:0 3px 10px rgba(90,80,60,.12);animation:fade .3s both">
+            <div style="width:22px;height:22px;flex:none;border-radius:7px;background:#F2734E;padding:2px">
+              <div style="width:100%;height:100%;border-radius:5px;background:repeating-linear-gradient(135deg,#F7EDE6 0 4px,#EFDFD5 4px 8px)"></div>
+            </div>
+            <div style="font:500 12px 'Noto Sans KR';color:#544D42;white-space:nowrap">마커를 누르면 그 장소의 사진과 기억이 열립니다</div>
+          </div>
+        </sc-if>
+      </div>
+
+      <div style="position:absolute;right:18px;bottom:18px;display:flex;flex-direction:column;gap:6px">
+        <div onClick="{{ zoomIn }}" style="width:36px;height:36px;border-radius:10px;background:#FFFDF8;box-shadow:0 2px 8px rgba(90,80,60,.18);font:400 17px/36px 'Noto Sans KR';color:#6E675A;text-align:center;cursor:pointer;user-select:none" style-hover="background:#FFF6EC">＋</div>
+        <div style="width:36px;height:36px;border-radius:10px;background:#FFFDF8;box-shadow:0 2px 8px rgba(90,80,60,.18);font:600 11px/36px 'Noto Sans KR';color:#8A8474;text-align:center;user-select:none">{{ zoomLabel }}</div>
+        <div onClick="{{ zoomOut }}" style="width:36px;height:36px;border-radius:10px;background:#FFFDF8;box-shadow:0 2px 8px rgba(90,80,60,.18);font:400 17px/36px 'Noto Sans KR';color:#6E675A;text-align:center;cursor:pointer;user-select:none" style-hover="background:#FFF6EC">－</div>
+      </div>
+    </div>
+
+    <sc-if value="{{ hasSel }}" hint-placeholder-val="{{ false }}">
+      <div style="width:372px;flex:none;border-left:1px solid #EDE6D8;background:#FFFDF8;overflow-y:auto;padding:16px 18px;animation:slidein .3s ease both">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+          <div style="{{ sel.chip }}"><span>♥</span>{{ sel.cat }}</div>
+          <span style="font:400 11.5px 'Noto Sans KR';color:#9A9384">{{ sel.where }}</span>
+          <div style="flex:1"></div>
+          <div onClick="{{ clearSel }}" style="width:26px;height:26px;border-radius:50%;background:#F4EFE4;color:#8A8474;font:500 13px/26px 'Noto Sans KR';text-align:center;cursor:pointer">✕</div>
+        </div>
+        <div style="font:700 21px/1.35 Gaegu,'Noto Sans KR';color:#2E2A24;margin-bottom:10px">{{ sel.name }}</div>
+
+        <div style="{{ sel.photoFrame }}">
+          <div style="{{ sel.photo }}"></div>
+        </div>
+
+        <div onClick="{{ warm }}" style="{{ sel.tempBtn }}" style-hover="background:#FFF6F2">
+          <div style="width:12px;height:38px;border-radius:6px;background:#F1E7DA;position:relative;overflow:hidden">
+            <div style="{{ sel.gauge }}"></div>
+          </div>
+          <div>
+            <div style="font:400 10.5px 'Noto Sans KR';color:#9A9384">이 장소의 기억 온도</div>
+            <div style="font:700 19px/1.15 'Noto Sans KR';color:#E06A50">{{ placeTempText }}°</div>
+          </div>
+          <div style="flex:1"></div>
+          <div style="{{ sel.warmLabel }}">{{ sel.warmText }}</div>
+        </div>
+
+        <sc-if value="{{ showList }}" hint-placeholder-val="{{ false }}">
+          <div style="margin-top:12px;animation:fade .25s both">
+            <div style="display:flex;align-items:baseline;gap:7px;margin-bottom:8px">
+              <span style="font:700 13px 'Noto Sans KR';color:#2E2A24">이 장소에 쌓인 기억 {{ sel.memN }}개</span>
+              <span style="font:400 11px 'Noto Sans KR';color:#9A9384">눌러서 전체 보기</span>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <sc-for list="{{ memList }}" as="r" hint-placeholder-count="3">
+                <div onClick="{{ r.open }}" style="{{ r.row }}" style-hover="border-color:#E0B9AB;background:#FFFBF4">
+                  <div style="{{ r.avatar }}">{{ r.initial }}</div>
+                  <div style="flex:1;min-width:0">
+                    <div style="display:flex;align-items:baseline;gap:6px">
+                      <span style="font:700 12.5px 'Noto Sans KR';color:#2E2A24">{{ r.author }}</span>
+                      <span style="font:400 10.5px 'Noto Sans KR';color:#9A9384">{{ r.who }}</span>
+                    </div>
+                    <div style="font:600 12.5px/1.5 'Noto Sans KR';color:#3A352D;margin-top:3px;word-break:keep-all">{{ r.title }}</div>
+                    <div style="font:400 11.5px/1.6 'Noto Sans KR';color:#9A9384;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ r.excerpt }}</div>
+                  </div>
+                  <div style="{{ r.temp }}">{{ r.tempText }}</div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ showReview }}" hint-placeholder-val="{{ true }}">
+          <div key="{{ memKey }}" style="margin-top:12px;animation:fade .25s both">
+            <sc-if value="{{ canBack }}" hint-placeholder-val="{{ false }}">
+              <div onClick="{{ backToList }}" style="display:inline-flex;align-items:center;gap:6px;background:#F4EFE4;border-radius:999px;padding:6px 13px;font:600 11.5px 'Noto Sans KR';color:#6E675A;cursor:pointer;margin-bottom:9px" style-hover="background:#EDE6D8">‹ 기억 목록으로</div>
+            </sc-if>
+            <div style="{{ sel.reviewFrame }}">
+              <div style="border-radius:15px;background:#FFFDF8;padding:14px 15px">
+                <div style="display:flex;align-items:baseline;gap:7px">
+                  <span style="font:700 13px 'Noto Sans KR';color:#2E2A24">{{ mem.author }}</span>
+                  <span style="font:400 11.5px 'Noto Sans KR';color:#9A9384">{{ mem.who }}</span>
+                </div>
+                <div style="font:700 17px/1.5 Gaegu,'Noto Sans KR';color:#2E2A24;margin-top:7px">{{ mem.title }}</div>
+                <p style="margin:7px 0 0;font:400 13px/1.85 'Noto Sans KR';color:#544D42;text-wrap:pretty;word-break:keep-all">{{ mem.story }}</p>
+                <div style="margin-top:11px;font:400 11.5px 'Noto Sans KR';color:#9A9384">{{ mem.date }} 등록</div>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ sel.inCourse }}" hint-placeholder-val="{{ false }}">
+          <div onClick="{{ sel.goCourse }}" style="margin-top:12px;border:1px solid #EDE6D8;border-radius:14px;padding:11px 13px;display:flex;align-items:center;gap:9px;cursor:pointer;background:#FFF" style-hover="border-color:#E0B9AB">
+            <div style="font:500 12px 'Noto Sans KR';color:#544D42;word-break:keep-all">{{ sel.courseText }}</div>
+            <div style="flex:1"></div>
+            <span style="font:700 12px 'Noto Sans KR';color:#E06A50">코스 보기 ›</span>
+          </div>
+        </sc-if>
+
+        <div style="margin-top:16px;font:700 12.5px 'Noto Sans KR';color:#2E2A24">{{ nearTitle }}</div>
+        <div style="display:flex;gap:9px;margin-top:9px">
+          <sc-for list="{{ nearby }}" as="n" hint-placeholder-count="2">
+            <div onClick="{{ n.select }}" style="flex:1;border:1px solid #EDE6D8;border-radius:12px;padding:9px;cursor:pointer;background:#FFF" style-hover="border-color:#E0B9AB">
+              <div style="{{ n.photo }}"></div>
+              <div style="font:500 11.5px 'Noto Sans KR';color:#3A352D;margin-top:6px;word-break:keep-all">{{ n.name }}</div>
+              <div style="font:400 10.5px 'Noto Sans KR';color:#9A9384;margin-top:2px">기억 {{ n.count }}</div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </sc-if>
+  </div>
+  </sc-if>
+
+  <sc-if value="{{ isCourses }}" hint-placeholder-val="{{ false }}">
+    <div style="flex:1;min-height:0;overflow-y:auto;padding:30px 34px;animation:fade .25s both">
+      <div style="font:700 28px/1.3 Gaegu,'Noto Sans KR';color:#2E2A24">테마형 코스</div>
+      <div style="font:400 13px/1.8 'Noto Sans KR';color:#9A9384;margin-top:4px;max-width:520px;word-break:keep-all">주민 사연을 이어 걷는 산책 코스입니다. 코스를 고르면 지도에 그 장소들만 순서대로 표시됩니다.</div>
+      <div style="display:flex;flex-wrap:wrap;gap:16px;margin-top:22px">
+        <sc-for list="{{ courseCards }}" as="k" hint-placeholder-count="3">
+          <div style="width:340px;border:1px solid #EDE6D8;border-radius:18px;background:#FFF;overflow:hidden">
+            <div style="{{ k.cover }}"></div>
+            <div style="padding:14px 16px 16px">
+              <div style="font:700 20px Gaegu,'Noto Sans KR';color:#2E2A24">{{ k.name }}</div>
+              <div style="font:400 12px 'Noto Sans KR';color:#9A9384;margin-top:4px">{{ k.meta }}</div>
+              <div style="display:flex;flex-direction:column;gap:7px;margin-top:12px">
+                <sc-for list="{{ k.stops }}" as="s" hint-placeholder-count="3">
+                  <div onClick="{{ s.open }}" style="display:flex;align-items:center;gap:9px;cursor:pointer;border-radius:10px;padding:6px 7px" style-hover="background:#FAF6EC">
+                    <div style="{{ s.num }}">{{ s.order }}</div>
+                    <div style="font:500 12.5px 'Noto Sans KR';color:#3A352D;word-break:keep-all">{{ s.name }}</div>
+                    <div style="flex:1"></div>
+                    <div style="font:400 11px 'Noto Sans KR';color:#9A9384">기억 {{ s.count }}</div>
+                  </div>
+                </sc-for>
+              </div>
+              <div onClick="{{ k.show }}" style="margin-top:14px;background:#2E2A24;color:#fff;border-radius:999px;padding:10px 0;text-align:center;font:700 12.5px 'Noto Sans KR';cursor:pointer;user-select:none" style-hover="background:#443E35">지도에서 코스 보기</div>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ isInbox }}" hint-placeholder-val="{{ false }}">
+    <div style="flex:1;min-height:0;overflow-y:auto;padding:30px 34px;animation:fade .25s both">
+      <div style="display:flex;align-items:baseline;gap:10px">
+        <div style="font:700 28px/1.3 Gaegu,'Noto Sans KR';color:#2E2A24">제보함</div>
+        <div style="font:500 12px 'Noto Sans KR';color:#C9553A;background:#FDEDE7;border-radius:999px;padding:4px 10px">검토 대기 {{ waitCount }}</div>
+      </div>
+      <div style="font:400 13px/1.8 'Noto Sans KR';color:#9A9384;margin-top:4px;white-space:nowrap">제보한 기억은 지도에 바로 올라가지 않습니다. 먼저 이곳에 보관되고, 동네 검토를 거친 뒤 지도에 반영됩니다.</div>
+
+      <div style="display:flex;gap:10px;margin-top:20px;flex-wrap:wrap">
+        <div style="border:1px solid #EDE6D8;border-radius:14px;padding:14px 18px;min-width:150px;background:#FFF">
+          <div style="font:400 11.5px 'Noto Sans KR';color:#9A9384">보관됨</div>
+          <div style="font:700 24px 'Noto Sans KR';color:#2E2A24;margin-top:2px">{{ waitCount }}</div>
+        </div>
+        <div style="border:1px solid #EDE6D8;border-radius:14px;padding:14px 18px;min-width:150px;background:#FFF">
+          <div style="font:400 11.5px 'Noto Sans KR';color:#9A9384">지도에 반영됨</div>
+          <div style="font:700 24px 'Noto Sans KR';color:#2E2A24;margin-top:2px">{{ liveCount }}</div>
+        </div>
+      </div>
+
+      <div style="margin-top:22px;display:flex;flex-direction:column;gap:10px;max-width:720px">
+        <sc-for list="{{ inboxList }}" as="i" hint-placeholder-count="2">
+          <div style="border:1px solid #EDE6D8;border-radius:16px;padding:13px;display:flex;gap:13px;align-items:flex-start;background:#FFF">
+            <div style="{{ i.thumb }}"></div>
+            <div style="flex:1;min-width:0">
+              <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+                <div style="{{ i.chip }}"><span>♥</span>{{ i.cat }}</div>
+                <span style="font:700 13.5px 'Noto Sans KR';color:#2E2A24">{{ i.place }}</span>
+                <span style="font:400 11px 'Noto Sans KR';color:#9A9384">{{ i.date }}</span>
+              </div>
+              <p style="margin:6px 0 0;font:400 12.5px/1.8 'Noto Sans KR';color:#6E675A;word-break:keep-all">{{ i.story }}</p>
+            </div>
+            <div style="{{ i.status }}">검토 대기</div>
+          </div>
+        </sc-for>
+        <sc-if value="{{ inboxEmpty }}" hint-placeholder-val="{{ false }}">
+          <div style="border:2px dashed #E3DCCC;border-radius:16px;padding:34px;text-align:center">
+            <div style="font:700 19px Gaegu,'Noto Sans KR';color:#2E2A24">아직 보관된 기억이 없습니다</div>
+            <div style="font:400 12px/1.8 'Noto Sans KR';color:#9A9384;margin-top:6px">오른쪽 위 우체통을 눌러 첫 기억을 넣어보세요.</div>
+            <div onClick="{{ openForm }}" style="display:inline-block;margin-top:14px;background:#2E2A24;color:#fff;border-radius:999px;padding:10px 20px;font:700 12.5px 'Noto Sans KR';cursor:pointer">기억 제보하기</div>
+          </div>
+        </sc-if>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ formOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;inset:0;background:rgba(46,42,36,.42);display:flex;align-items:center;justify-content:center;z-index:20;animation:fade .2s both;padding:20px;overflow-y:auto">
+      <div style="width:460px;max-width:92vw;background:#FFFDF8;border-radius:22px;padding:22px;box-shadow:0 20px 60px rgba(0,0,0,.3);animation:pop .26s ease both">
+        <div style="display:flex;align-items:center;gap:10px">
+          <div style="width:26px;height:30px;position:relative">
+            <div style="position:absolute;left:2px;top:1px;width:22px;height:20px;border-radius:11px 11px 3px 3px;background:#F0806A"></div>
+            <div style="position:absolute;left:7px;top:8px;width:13px;height:3px;border-radius:2px;background:#7E3B2C"></div>
+            <div style="position:absolute;left:10px;top:21px;width:7px;height:9px;background:#D96C56"></div>
+          </div>
+          <div style="font:700 20px Gaegu,'Noto Sans KR';color:#2E2A24">기억 제보하기</div>
+          <div style="flex:1"></div>
+          <div onClick="{{ closeForm }}" style="width:28px;height:28px;border-radius:50%;background:#F4EFE4;color:#8A8474;font:500 14px/28px 'Noto Sans KR';text-align:center;cursor:pointer">✕</div>
+        </div>
+        <div style="margin-top:14px;font:500 12px 'Noto Sans KR';color:#6E675A">카테고리</div>
+        <div style="display:flex;gap:7px;margin-top:7px;flex-wrap:wrap">
+          <sc-for list="{{ formCats }}" as="f" hint-placeholder-count="4">
+            <div onClick="{{ f.pick }}" style="{{ f.style }}"><span style="{{ f.heart }}">♥</span>{{ f.label }}</div>
+          </sc-for>
+        </div>
+        <div style="margin-top:14px;font:500 12px 'Noto Sans KR';color:#6E675A">장소 사진</div>
+        <div style="margin-top:7px;height:92px;border-radius:14px;border:2px dashed #DED6C6;background:repeating-linear-gradient(135deg,#F8F4EA 0 8px,#F1ECE0 8px 16px);display:flex;align-items:center;justify-content:center;font:500 10.5px ui-monospace,monospace;color:#A39B8B;cursor:pointer">사진을 끌어다 놓기</div>
+        <div style="margin-top:14px;font:500 12px 'Noto Sans KR';color:#6E675A">장소 이름</div>
+        <input value="{{ formPlace }}" onChange="{{ setPlace }}" placeholder="예) 무계정사길 담장" style="margin-top:7px;width:100%;border:1px solid #E3DCCC;border-radius:11px;padding:10px 12px;font:400 13px 'Noto Sans KR';color:#2E2A24;background:#FFF;outline:none"></input>
+        <div style="margin-top:14px;font:500 12px 'Noto Sans KR';color:#6E675A">이 장소에 얽힌 기억</div>
+        <textarea value="{{ formStory }}" onChange="{{ setStory }}" placeholder="짧아도 좋아요. 언제, 누구와, 무엇이 기억에 남았는지." rows="4" style="margin-top:7px;width:100%;border:1px solid #E3DCCC;border-radius:11px;padding:10px 12px;font:400 13px/1.7 'Noto Sans KR';color:#2E2A24;background:#FFF;outline:none;resize:none"></textarea>
+        <div style="margin-top:14px;display:flex;align-items:center;gap:12px">
+          <div style="flex:1;font:400 11px/1.6 'Noto Sans KR';color:#9A9384;word-break:keep-all">이미 지도에 있는 장소라면, 그 장소에 기억이 하나 더 쌓입니다.</div>
+          <div onClick="{{ submitForm }}" style="{{ submitStyle }}" style-hover="background:#443E35">제보함에 넣기</div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ toast }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ goInbox }}" style="position:fixed;left:50%;bottom:34px;transform:translateX(-50%);background:#2E2A24;color:#FFF;border-radius:999px;padding:12px 22px;font:500 13px 'Noto Sans KR';box-shadow:0 10px 30px rgba(0,0,0,.28);z-index:30;cursor:pointer;animation:pop .24s ease both">{{ toastText }}</div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{}">
+const CATS = {
+  food:    { label: "먹거리",       color: "#E8517E", tintA: "#FAE6EC", tintB: "#F2D3DD", chipBg: "#FCEDF2", chipFg: "#B8385E" },
+  culture: { label: "역사·문화공간", color: "#F2734E", tintA: "#F7EDE6", tintB: "#EFDFD5", chipBg: "#FDEDE7", chipFg: "#C9553A" },
+  life:    { label: "동네생활",     color: "#F2C14E", tintA: "#FBF0D8", tintB: "#F3E3C0", chipBg: "#FCF3E0", chipFg: "#9A7415" },
+  view:    { label: "풍경",         color: "#5FB87A", tintA: "#E5F2E8", tintB: "#D3E8D9", chipBg: "#EAF5ED", chipFg: "#33794B" }
+};
+
+// vx, vy are in the map SVG's own viewBox space (620 x 680)
+const PLACES = [
+  { id: "hongjecheon", cat: "view", vx: 210, vy: 420, name: "홍제천", where: "홍제동",
+    img: "uploads/pasted-1789237082319-0.png", memories: [
+    { author: "천변산책", who: "20대 · 홍제동 4년", date: "2026.04.01", temp: 40.1, title: "물 위로 벚잎 떠내려가던 봄",
+      story: "이사 와서 처음 걸은 길입니다. 물에 벚잎이 떠서 흘러가는 걸 보고, 여기서 오래 살아도 좋겠다고 생각했어요. 지금도 봄이 되면 그 자리에 서 있습니다." },
+    { author: "두바퀴", who: "60대 · 홍제동 28년", date: "2026.03.19", temp: 38.4, title: "매일 저녁 아내와 걷는 길",
+      story: "수술 끝나고 걷기 연습을 여기서 했습니다. 처음엔 다리 하나도 못 건넜는데 지금은 하루에 두 바퀴 돕니다. 징검다리 개수까지 다 외웠어요." },
+    { author: "개구리소년", who: "40대 · 홍제동 33년", date: "2026.02.24", temp: 37.6, title: "여름엔 여기가 우리 수영장이었다",
+      story: "복개되기 전에는 물이 더 얕았어요. 친구들과 바지를 걷고 들어가 한참을 놀다 어머니한테 붙잡혀 갔습니다. 다시 물이 흐르는 걸 보면 그 여름이 떠올라요." }
+  ], course: "c2", order: 2 },
+
+  { id: "buamview", cat: "view", vx: 470, vy: 580, name: "부암동 언덕 야경", where: "부암동",
+    img: "uploads/pasted-1789237092734-0.png", memories: [
+    { author: "한켠이", who: "60대 · 부암동 34년", date: "2026.03.14", temp: 38.2, title: "속상한 날엔 여기까지 걸어 올라왔다",
+      story: "언덕 끝에 서면 남산까지 불빛이 쭉 보입니다. 속상한 일이 있을 때마다 여기까지 걸어와 한참을 서 있었어요. 내려갈 때는 늘 마음이 조금 가벼워졌습니다." },
+    { author: "사진관집", who: "50대 · 부암동 22년", date: "2026.02.19", temp: 37.5, title: "아버지가 제일 좋아한 자리",
+      story: "동네 사진관을 하던 아버지는 해가 막 넘어갈 때 이 언덕에 올랐어요. 필름 반 통을 늘 이 풍경에 썼습니다. 저희 부부 사진도 여기서 찍었습니다." }
+  ], course: "c1", order: 3 },
+
+  { id: "total", cat: "culture", vx: 520, vy: 250, name: "토탈미술관", where: "평창동",
+    img: "uploads/pasted-1789237110156-0.png", memories: [
+    { author: "평창댁", who: "70대 · 평창동 41년", date: "2026.02.11", temp: 36.9, title: "동네에 미술관이 생긴 날",
+      story: "산길 끝에 유리로 된 건물이 올라가는 걸 매일 구경했습니다. 처음 전시를 보러 들어간 날, 이 동네가 조금 달라졌다고 느꼈어요." },
+    { author: "마당의자", who: "30대 · 평창동 6년", date: "2026.03.27", temp: 37.8, title: "전시보다 마당에 오래 앉아 있었다",
+      story: "빨간 의자에 앉아 있으면 소나무 그늘이 천천히 움직입니다. 일이 꼬인 날에는 전시는 대충 보고 마당에만 앉아 있다 옵니다." }
+  ], course: "c3", order: 1 },
+
+  { id: "seokpajeong", cat: "culture", vx: 360, vy: 500, name: "석파정", where: "부암동",
+    img: "uploads/pasted-1789237153596-0.png", memories: [
+    { author: "단풍집", who: "50대 · 부암동 17년", date: "2026.11.08", temp: 39.2, title: "단풍 들면 제일 먼저 오는 곳",
+      story: "가을이면 정자 옆 바위에 앉아 도시락을 먹습니다. 아이가 어릴 때는 여기서 낮잠을 재웠어요. 지금은 그 아이가 사진을 찍어줍니다." },
+    { author: "골목냥", who: "20대 · 부암동 3년", date: "2026.04.02", temp: 36.8, title: "첫 데이트 장소였습니다",
+      story: "동네에 아는 곳이 없어서 여기로 데려왔어요. 정자에 앉아 두 시간을 이야기했는데, 그날 이후 부암동이 좋아졌습니다." },
+    { author: "돌담", who: "70대 · 부암동 45년", date: "2026.01.30", temp: 38.0, title: "예전엔 담이 낮아서 그냥 들어왔다",
+      story: "어릴 때는 이 뒤로 뛰어들어와 숨바꼭질을 했습니다. 어른들이 쫓아오면 계곡으로 도망쳤어요. 지금은 표를 사고 얌전히 들어갑니다." }
+  ], course: "c1", order: 1 },
+
+  { id: "archive", cat: "culture", vx: 585, vy: 405, name: "서울시립 미술아카이브", where: "평창동",
+    img: "uploads/pasted-1789237170972-0.png", memories: [
+    { author: "열람실", who: "40대 · 평창동 11년", date: "2026.03.05", temp: 37.3, title: "비 오는 평일 오후의 열람실",
+      story: "비 오는 날 여기 앉아 자료를 넘기면 창밖 소나무가 흔들립니다. 동네에 이런 조용한 방이 하나 있다는 게 좋습니다." }
+  ], course: "c3", order: 2 },
+
+  { id: "yongssine", cat: "food", vx: 90, vy: 300, name: "용씨네 누룽지통닭", where: "홍제동",
+    img: "uploads/pasted-1789237179500-0.png", memories: [
+    { author: "야자생", who: "20대 · 홍제동 19년", date: "2026.03.11", temp: 38.1, title: "야자 끝나고 셋이 나눠 먹던 한 마리",
+      story: "고3 때 시험 끝난 날에만 왔습니다. 셋이 한 마리를 나눠 먹고 남은 누룽지는 싸달라고 했어요. 그게 우리 졸업식이었습니다." },
+    { author: "옆집엄마", who: "50대 · 홍제동 21년", date: "2026.04.05", temp: 37.6, title: "이사 온 날 저녁을 여기서",
+      story: "짐 정리에 지쳐 아무것도 못 하던 날, 이 집 통닭 한 마리로 온 가족이 저녁을 먹었습니다. 그날 이후 우리 집 기념일 메뉴예요." }
+  ], course: "c2", order: 1 },
+
+  { id: "donkatsu", cat: "food", vx: 350, vy: 300, name: "세검정 돈까스", where: "부암동",
+    img: "uploads/pasted-1789237203257-0.png", memories: [
+    { author: "삼거리", who: "30대 · 부암동 8년", date: "2026.02.28", temp: 37.1, title: "혼자 밥 먹기 편했던 첫 가게",
+      story: "이 동네로 혼자 이사 왔을 때 제일 먼저 단골이 된 집입니다. 사장님이 밥 두 덩이를 늘 꽉 눌러 담아 주셨어요." },
+    { author: "반장", who: "40대 · 부암동 19년", date: "2026.03.21", temp: 36.6, title: "산책 끝에 먹는 점심",
+      story: "계곡까지 걷고 내려오면 꼭 여기서 점심을 먹습니다. 튀김 소리랑 국 냄새가 같이 나면 걷느라 힘든 게 다 풀려요." }
+  ], course: "c1", order: 2 }
+];
+
+// 이전 목업 데이터 (미사용)
+const PLACES_LEGACY = [
+  { id: "p1", cat: "culture", vx: 352, vy: 432, name: "무계정사길 담장", where: "부암동", memories: [
+    { author: "한켠이", who: "60대 · 부암동 34년", date: "2026.03.14", temp: 38.2, title: "비 오는 날 이 담장 아래서 버스를 기다렸다",
+      story: "일곱 살 딸아이 손을 잡고 이 길을 오르내린 게 벌써 삼십 년입니다. 담장에 기대 서면 종로 쪽 불빛이 보여서, 속상한 일이 있을 때마다 여기까지 걸어와 한참을 서 있었어요." },
+    { author: "골목냥", who: "20대 · 부암동 3년", date: "2026.04.02", temp: 36.8, title: "고양이가 항상 이 담 위에 앉아 있었다",
+      story: "이사 온 첫 주에 이 담 위 삼색 고양이랑 눈이 마주쳤어요. 그 뒤로 퇴근길마다 여기서 잠깐 서 있다 갑니다. 요즘은 저를 보면 먼저 내려와요." },
+    { author: "사진관집", who: "50대 · 부암동 22년", date: "2026.02.19", temp: 37.5, title: "결혼사진을 여기서 찍었습니다",
+      story: "동네 사진관을 하던 아버지가 이 담장 앞을 제일 좋아하셨어요. 오후 네 시쯤 빛이 좋다고요. 저희 부부 사진도 여기서 찍었습니다." }
+  ], course: "c1", order: 1 },
+
+  { id: "p2", cat: "life", vx: 470, vy: 572, name: "창의문로 계단 구멍가게 자리", where: "부암동", memories: [
+    { author: "삼거리", who: "30대 · 부암동 8년", date: "2026.02.28", temp: 37.1, title: "계단 위 구멍가게 아이스크림",
+      story: "학교 끝나고 이 계단을 오르면 딱 목이 말랐어요. 주인 할머니가 백 원 부족하면 그냥 가져가라고 하셨습니다. 가게는 없어졌지만 계단 턱은 그대로예요." },
+    { author: "반장", who: "40대 · 부암동 19년", date: "2026.03.21", temp: 36.6, title: "여기서 숨 고르고 올라갔다",
+      story: "이 계단이 스물여덟 칸입니다. 장바구니 들고 오르다 꼭 여기서 한 번 쉬어요. 쉬는 사람끼리 눈인사하는 게 이 동네 인사법입니다." }
+  ], course: "c1", order: 2 },
+
+  { id: "p3", cat: "view", vx: 222, vy: 176, name: "백사실 계곡 입구", where: "신영동", memories: [
+    { author: "물소리", who: "40대 · 신영동 12년", date: "2026.01.09", temp: 39.4, title: "여름밤 물소리만 듣고 앉아 있던 자리",
+      story: "더운 밤에 잠이 안 오면 여기까지 걸어와 앉아 있었습니다. 개구리 소리랑 물소리가 섞여서, 서울인 걸 잊게 되는 곳이에요." },
+    { author: "새벽러너", who: "30대 · 신영동 5년", date: "2026.03.30", temp: 37.9, title: "겨울 아침에 김이 오르던 계곡",
+      story: "아침 여섯 시에 뛰다 보면 계곡에서 김이 올라와요. 그 장면 보려고 추운 날에도 나옵니다." }
+  ], course: "c1", order: 3 },
+
+  { id: "p4", cat: "food", vx: 336, vy: 110, name: "세검정로 통닭집", where: "신영동", memories: [
+    { author: "노랑봉투", who: "50대 · 신영동 26년", date: "2026.03.02", temp: 37.8, title: "아버지 월급날의 통닭집",
+      story: "월급날이면 아버지가 이 골목에서 통닭을 사 오셨어요. 기름종이 봉투를 들고 뛰어오던 발소리가 아직 들립니다." }
+  ], course: null, order: null },
+
+  { id: "p5", cat: "life", vx: 540, vy: 256, name: "미술관 뒷길 눈길", where: "평창동", memories: [
+    { author: "평창댁", who: "70대 · 평창동 41년", date: "2026.02.11", temp: 36.9, title: "눈 오면 제일 먼저 쓸던 길",
+      story: "경사가 급해서 눈만 오면 온 동네가 빗자루를 들고 나왔습니다. 서로 인사도 안 하던 이웃들이 그때는 다 같이 웃었어요." },
+    { author: "언덕집", who: "60대 · 평창동 30년", date: "2026.02.15", temp: 37.2, title: "연탄을 지고 오르던 길",
+      story: "리어카가 못 올라와서 연탄을 등에 지고 올랐습니다. 힘들었지만 그 겨울 방은 참 따뜻했어요." }
+  ], course: "c3", order: 1 },
+
+  { id: "p6", cat: "food", vx: 128, vy: 480, name: "저녁 밥상 골목 김밥집", where: "홍제동", memories: [
+    { author: "여섯시", who: "40대 · 홍제동 15년", date: "2026.03.08", temp: 38.9, title: "퇴근길에 두 줄 사던 김밥집",
+      story: "야근하고 오면 여기만 불이 켜져 있었어요. 사장님이 늘 하나 더 넣어주시면서 '오늘도 늦었네' 하셨습니다." },
+    { author: "야자생", who: "20대 · 홍제동 19년", date: "2026.03.11", temp: 38.1, title: "야자 끝나고 먹던 참치김밥",
+      story: "고3 때 매일 밤 열 시에 왔어요. 시험 끝난 날엔 사장님이 라면을 하나 끓여주셨습니다. 그게 제 졸업식이었어요." },
+    { author: "옆집엄마", who: "50대 · 홍제동 21년", date: "2026.04.05", temp: 37.6, title: "이사 온 날 저녁을 여기서",
+      story: "짐 정리에 지쳐 아무것도 못 하던 날, 이 집 김밥 두 줄로 온 가족이 저녁을 먹었습니다. 그날 이후 우리 집 기념일 메뉴예요." }
+  ], course: "c2", order: 2 },
+
+  { id: "p7", cat: "view", vx: 196, vy: 604, name: "홍제천 산책로 벤치", where: "홍제동", memories: [
+    { author: "천변산책", who: "20대 · 홍제동 4년", date: "2026.04.01", temp: 40.1, title: "물 위로 벚잎 떠내려가던 봄",
+      story: "이사 와서 처음 걸은 길입니다. 벚잎이 물에 떠서 흘러가는 걸 보고 여기서 오래 살아도 좋겠다고 생각했어요." },
+    { author: "두바퀴", who: "60대 · 홍제동 28년", date: "2026.03.19", temp: 38.4, title: "매일 저녁 아내와 걷는 길",
+      story: "수술 끝나고 걷기 연습을 여기서 했습니다. 지금은 하루에 두 바퀴 돕니다. 벤치 개수까지 다 외웠어요." }
+  ], course: "c2", order: 3 },
+
+  { id: "p8", cat: "culture", vx: 76, vy: 268, name: "옛 목욕탕 굴뚝 자리", where: "홍제동", memories: [
+    { author: "굴뚝", who: "60대 · 홍제동 38년", date: "2026.01.22", temp: 37.4, title: "굴뚝이 보이면 집에 다 온 거였다",
+      story: "버스에서 굴뚝이 보이면 다 왔다고 짐을 챙겼습니다. 목욕탕은 사라졌지만 그 자리를 지날 때마다 물비누 냄새가 떠올라요." },
+    { author: "때밀이집손녀", who: "30대 · 홍제동 31년", date: "2026.02.07", temp: 38.6, title: "할머니가 일하던 목욕탕",
+      story: "할머니가 여기서 삼십 년을 일하셨어요. 일요일이면 저를 데리고 와서 제일 뜨거운 탕에 넣으셨습니다. 아직도 그 온도를 기억해요." }
+  ], course: "c2", order: 1 }
+];
+
+const COURSES = [
+  { id: "c1", name: "부암동 언덕 한바퀴", km: "2.2km · 50분" },
+  { id: "c2", name: "홍제동 저녁 밥상길", km: "1.4km · 30분" },
+  { id: "c3", name: "평창동 미술관 뒷길", km: "1.9km · 40분" }
+];
+
+const COURSES_LEGACY = [
+  { id: "c1", name: "부암동 언덕 한바퀴", km: "1.8km · 40분" },
+  { id: "c2", name: "홍제동 저녁 밥상길", km: "1.2km · 25분" },
+  { id: "c3", name: "평창동 미술관 뒷길", km: "2.1km · 45분" }
+];
+
+const SEED_INBOX = [
+  { cat: "life", place: "신영동 빨래터 자리", date: "2일 전",
+    story: "어릴 때 어머니가 여기서 이불을 빨았습니다. 지금은 화단이 되었지만 돌 턱이 그대로 남아 있어요." },
+  { cat: "view", place: "부암동 버스 종점 언덕", date: "5일 전",
+    story: "종점에서 내려 뒤돌아보면 동네가 한눈에 보입니다. 이사 갈 때 마지막으로 본 풍경이에요." }
+];
+
+const VBW = 620, VBH = 680;
+
+class Component extends DCLogic {
+  state = {
+    view: "map", selId: null, memIdx: null, warmed: {}, zoom: 1,
+    cats: { food: true, culture: true, life: true, view: true },
+    course: null, formOpen: false, formCat: "culture", formPlace: "", formStory: "",
+    toast: "", inbox: SEED_INBOX, mw: 0, mh: 0
+  };
+
+  attach() {
+    const el = document.querySelector("[data-map-pane]");
+    if (!el) { if (this._ro) { this._ro.disconnect(); this._ro = null; this._el = null; } return; }
+    if (el === this._el) return;
+    if (this._ro) this._ro.disconnect();
+    this._el = el;
+    const read = () => {
+      const r = el.getBoundingClientRect();
+      if (Math.abs(r.width - this.state.mw) > 0.5 || Math.abs(r.height - this.state.mh) > 0.5)
+        this.setState({ mw: r.width, mh: r.height });
+    };
+    this._read = read;
+    this._ro = new ResizeObserver(read);
+    this._ro.observe(el);
+    read();
+    requestAnimationFrame(read);
+  }
+  componentDidMount() {
+    this.attach();
+    requestAnimationFrame(() => this.attach());
+    this._onWin = () => { if (this._read) this._read(); };
+    window.addEventListener("resize", this._onWin);
+  }
+  componentDidUpdate() { this.attach(); if (this._read) this._read(); }
+  componentWillUnmount() {
+    if (this._ro) this._ro.disconnect();
+    window.removeEventListener("resize", this._onWin);
+    clearTimeout(this._t);
+  }
+
+  stripes(c, s) { s = s || 7; return `repeating-linear-gradient(135deg,${c.tintA} 0 ${s}px,${c.tintB} ${s}px ${s * 2}px)`; }
+  visible() {
+    const { cats, course } = this.state;
+    return PLACES.filter(p => cats[p.cat] && (!course || p.course === course));
+  }
+  pick(id) {
+    const p = PLACES.find(q => q.id === id);
+    this.setState({ selId: id, memIdx: p && p.memories.length > 1 ? null : 0 });
+  }
+  placeTemp(p) {
+    const base = p.memories.reduce((n, m) => n + m.temp, 0) / p.memories.length;
+    return base + (this.state.warmed[p.id] ? 0.4 : 0);
+  }
+
+  renderVals() {
+    const st = this.state;
+    const vis = this.visible();
+    const sel = PLACES.find(p => p.id === st.selId && vis.includes(p)) || null;
+    const multi = sel ? sel.memories.length > 1 : false;
+    const mi = sel && st.memIdx !== null ? Math.min(st.memIdx, sel.memories.length - 1) : null;
+    const mem = mi !== null ? sel.memories[mi] : {};
+    const c = sel ? CATS[sel.cat] : CATS.culture;
+    const warmKey = sel ? sel.id : "";
+    const warmed = !!st.warmed[warmKey];
+    const t = sel ? this.placeTemp(sel) : 0;
+
+    // map fit transform: whole viewBox visible, aspect preserved (matches preserveAspectRatio="xMidYMid meet")
+    const TOPBAND = 56; // strip reserved for the map's info/hint overlay
+    const availH = st.mh - TOPBAND;
+    const k = st.mw && availH > 0 ? Math.min(st.mw / VBW, availH / VBH) : 0;
+    const ox = (st.mw - VBW * k) / 2, oy = (availH - VBH * k) / 2;
+
+    const cats = Object.keys(CATS).map(key => {
+      const cc = CATS[key], on = st.cats[key];
+      return {
+        label: cc.label, count: PLACES.filter(p => p.cat === key).length,
+        style: { display: "flex", alignItems: "center", gap: "9px", borderRadius: "10px", padding: "9px 11px",
+          font: "500 13px 'Noto Sans KR'", color: on ? "#3A352D" : "#B4AD9E", cursor: "pointer",
+          background: on ? cc.chipBg : "transparent", border: "1px solid " + (on ? "transparent" : "#EDE6D8"), userSelect: "none" },
+        heart: { color: on ? cc.color : "#D8D1C2", fontSize: "15px" },
+        toggle: () => this.setState(s => ({ cats: { ...s.cats, [key]: !s.cats[key] } }))
+      };
+    });
+
+    const markers = vis.map(p => {
+      const cc = CATS[p.cat], isSel = sel && sel.id === p.id;
+      const size = isSel ? 66 : 48;
+      const many = p.memories.length > 1;
+      const fitted = k > 0;
+      const px = ox + p.vx * k, py = oy + p.vy * k;
+      const nearLeft = fitted && px < 130, nearRight = fitted && st.mw - px < 130;
+      return {
+        name: p.name,
+        order: st.course && p.order ? String(p.order) : "",
+        count: many ? String(p.memories.length) : "",
+        wrap: { position: "absolute",
+          left: fitted ? px + "px" : (p.vx / VBW * 100) + "%",
+          top: fitted ? py + "px" : (p.vy / VBH * 100) + "%",
+          transform: "translate(-50%,-100%)", cursor: "pointer", zIndex: isSel ? 6 : 3 },
+        float: { position: "relative", display: "flex", flexDirection: "column", alignItems: "center",
+          animation: `bob ${4 + (p.vx % 5) * 0.3}s ease-in-out infinite` },
+        tile: { width: size + "px", height: size + "px", borderRadius: isSel ? "19px" : "15px", background: cc.color,
+          padding: isSel ? "5px" : "4px", position: "relative",
+          boxShadow: isSel ? `0 0 0 4px ${cc.color}55, 0 12px 24px rgba(90,60,40,.3)` : "0 8px 18px rgba(90,60,40,.22)",
+          transition: "all .22s ease" },
+        photo: { width: "100%", height: "100%", borderRadius: isSel ? "14px" : "11px",
+          backgroundImage: `url("${p.img}")`, backgroundSize: "cover", backgroundPosition: "center",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          font: "700 15px 'Noto Sans KR'", color: "#FFF", textShadow: "0 1px 4px rgba(0,0,0,.6)" },
+        badge: many ? { position: "absolute", top: "-7px", right: "-7px", minWidth: "20px", height: "20px",
+          borderRadius: "10px", background: "#FFFDF8", color: cc.chipFg, font: "700 11px/20px 'Noto Sans KR'",
+          textAlign: "center", padding: "0 5px", boxShadow: "0 2px 6px rgba(0,0,0,.18)" } : { display: "none" },
+        tail: { width: (isSel ? 15 : 12) + "px", height: (isSel ? 15 : 12) + "px", background: cc.color,
+          transform: "rotate(45deg)", marginTop: (isSel ? -8 : -6) + "px", borderRadius: "3px" },
+        label: isSel ? {
+            position: "absolute", top: "calc(100% + 5px)", whiteSpace: "nowrap",
+            left: nearLeft ? "0" : nearRight ? "auto" : "50%",
+            right: nearRight ? "0" : "auto",
+            transform: nearLeft || nearRight ? "none" : "translateX(-50%)",
+            background: "rgba(255,255,255,.95)", borderRadius: "999px", padding: "4px 10px",
+            font: "600 11px 'Noto Sans KR'", color: "#3A352D", boxShadow: "0 3px 10px rgba(90,80,60,.16)" }
+          : { display: "none" },
+        select: () => this.pick(p.id)
+      };
+    });
+
+    const memList = sel ? sel.memories.map((m, i) => {
+      return { author: m.author, who: m.who, title: m.title, initial: m.author.slice(0, 1),
+        excerpt: m.story.slice(0, 34) + "…", tempText: m.date,
+        row: { display: "flex", gap: "11px", alignItems: "flex-start", border: "1px solid #EDE6D8",
+          borderRadius: "14px", padding: "11px 12px", background: "#FFF", cursor: "pointer", transition: "all .15s" },
+        avatar: { width: "30px", height: "30px", flex: "none", borderRadius: "50%", background: c.chipBg,
+          color: c.chipFg, font: "700 12px/30px 'Noto Sans KR'", textAlign: "center" },
+        temp: { flex: "none", alignSelf: "center", font: "400 10.5px 'Noto Sans KR'", color: "#B4AD9E" },
+        open: () => this.setState({ memIdx: i }) };
+    }) : [];
+
+    const nearby = sel
+      ? PLACES.filter(p => p.id !== sel.id && (sel.course ? p.course === sel.course : p.where === sel.where)).slice(0, 2).map(p => ({
+          name: p.name, count: p.memories.length,
+          photo: { height: "50px", borderRadius: "8px", backgroundImage: `url("${p.img}")`,
+            backgroundSize: "cover", backgroundPosition: "center" },
+          select: () => this.pick(p.id)
+        }))
+      : [];
+
+    const courseCards = COURSES.map(kc => {
+      const stops = PLACES.filter(p => p.course === kc.id).sort((a, b) => a.order - b.order);
+      return { name: kc.name,
+        meta: "사연 " + stops.reduce((n, p) => n + p.memories.length, 0) + "개 · 장소 " + stops.length + "곳 · " + kc.km,
+        cover: { height: "120px", backgroundImage: `url("${stops[0].img}")`,
+          backgroundSize: "cover", backgroundPosition: "center" },
+        stops: stops.map(p => ({ name: p.name, order: String(p.order), count: p.memories.length,
+          num: { width: "22px", height: "22px", borderRadius: "50%", background: CATS[p.cat].color, color: "#fff",
+            font: "700 11px/22px 'Noto Sans KR'", textAlign: "center", flex: "none" },
+          open: () => { this.setState({ view: "map", course: kc.id }); this.pick(p.id); } })),
+        show: () => this.setState({ view: "map", course: kc.id, selId: null, memIdx: null }) };
+    });
+
+    const inboxList = st.inbox.map(it => {
+      const cc = CATS[it.cat];
+      return { cat: cc.label, place: it.place, date: it.date, story: it.story,
+        thumb: { width: "72px", height: "72px", flex: "none", borderRadius: "12px", background: this.stripes(cc, 7) },
+        chip: { display: "flex", alignItems: "center", gap: "4px", background: cc.chipBg, borderRadius: "999px",
+          padding: "3px 9px", font: "700 11px 'Noto Sans KR'", color: cc.chipFg },
+        status: { flex: "none", alignSelf: "center", background: "#F6F1E6", borderRadius: "999px", padding: "6px 12px",
+          font: "600 11px 'Noto Sans KR'", color: "#8A8474", whiteSpace: "nowrap" } };
+    });
+
+    const formCats = Object.keys(CATS).map(key => {
+      const cc = CATS[key], on = st.formCat === key;
+      return { label: cc.label, heart: { color: cc.color, fontSize: "14px" },
+        style: { display: "flex", alignItems: "center", gap: "6px", borderRadius: "999px", padding: "8px 13px",
+          font: "500 12.5px 'Noto Sans KR'", color: "#3A352D", cursor: "pointer", background: on ? cc.chipBg : "#FFF",
+          border: "1px solid " + (on ? cc.color : "#E3DCCC"), userSelect: "none" },
+        pick: () => this.setState({ formCat: key }) };
+    });
+
+    const canSubmit = st.formPlace.trim() && st.formStory.trim();
+    const courseOf = sel && sel.course ? COURSES.find(x => x.id === sel.course) : null;
+
+    return {
+      paneRef: this.pane,
+      tabs: [{ key: "map", label: "지도" }, { key: "courses", label: "테마 코스" },
+             { key: "inbox", label: "제보함" + (st.inbox.length ? " " + st.inbox.length : "") }]
+        .map(tb => ({ label: tb.label,
+          style: { borderRadius: "999px", padding: "7px 14px", font: "500 13.5px 'Noto Sans KR'", cursor: "pointer",
+            color: st.view === tb.key ? "#2E2A24" : "#8A8474", background: st.view === tb.key ? "#F4EFE4" : "transparent",
+            userSelect: "none" },
+          go: () => this.setState({ view: tb.key }) })),
+      isMap: st.view === "map", isCourses: st.view === "courses", isInbox: st.view === "inbox",
+      cats, markers, memList, nearby, courseCards, inboxList, formCats,
+      hasSel: !!sel, noSel: !sel,
+      showList: !!sel && mi === null, showReview: !!sel && mi !== null, canBack: multi,
+      memKey: warmKey,
+      mem: { author: mem.author, who: mem.who, title: mem.title, story: mem.story, date: mem.date },
+      placeTempText: t ? t.toFixed(1) : "",
+      nearTitle: sel && sel.course ? "같은 코스의 다른 장소" : "같은 동네의 다른 기억",
+      sel: sel ? {
+        cat: c.label, where: sel.where, name: sel.name, memN: sel.memories.length,
+        chip: { display: "flex", alignItems: "center", gap: "5px", background: c.chipBg, borderRadius: "999px",
+          padding: "5px 10px", font: "700 12px 'Noto Sans KR'", color: c.chipFg },
+        photoFrame: { background: c.color, borderRadius: "20px", padding: "9px", boxShadow: "0 6px 18px rgba(140,90,70,.18)" },
+        photo: { borderRadius: "13px", height: "196px",
+          backgroundImage: `url("${sel.img}")`, backgroundSize: "cover", backgroundPosition: "center" },
+        reviewFrame: { background: c.color, borderRadius: "20px", padding: "9px", boxShadow: "0 6px 18px rgba(140,90,70,.18)" },
+        tempBtn: { marginTop: "10px", border: "2px solid " + c.color, borderRadius: "16px", padding: "11px 14px",
+          display: "flex", alignItems: "center", gap: "11px", cursor: "pointer", background: warmed ? "#FFF6F2" : "#FFF", userSelect: "none" },
+        gauge: { position: "absolute", left: 0, right: 0, bottom: 0, transition: "height .3s ease",
+          height: Math.min(100, Math.max(0, (t - 30) * 8)) + "%", background: "linear-gradient(#F2C14E,#E8517E)" },
+        warmText: warmed ? "♥ 기억을 더했어요" : "♥ 나도 기억해요",
+        warmLabel: { font: "700 13px 'Noto Sans KR'", color: warmed ? "#9A9384" : c.chipFg },
+        inCourse: !!courseOf,
+        courseText: courseOf ? "「" + courseOf.name + "」 " + sel.order + "번째 장소" : "",
+        goCourse: () => this.setState({ view: "courses" })
+      } : { inCourse: false },
+      backToList: () => this.setState({ memIdx: null }),
+      courseOn: !!st.course, courseName: st.course ? COURSES.find(x => x.id === st.course).name : "",
+      clearCourse: () => this.setState({ course: null }),
+      visibleLabel: "표시된 장소 " + vis.length + "곳 · 기억 " + vis.reduce((n, p) => n + p.memories.length, 0) + "개",
+      zoomLabel: Math.round(st.zoom * 100) + "%",
+      waitCount: st.inbox.length, liveCount: PLACES.reduce((n, p) => n + p.memories.length, 0),
+      inboxEmpty: st.inbox.length === 0,
+      mapStyle: { position: "absolute", left: 0, right: 0, top: "56px", bottom: 0, transformOrigin: "50% 50%",
+        transform: "scale(" + st.zoom + ")", transition: "transform .3s ease" },
+      formOpen: st.formOpen, formPlace: st.formPlace, formStory: st.formStory,
+      toast: !!st.toast, toastText: st.toast,
+      submitStyle: { background: canSubmit ? "#2E2A24" : "#C9C2B4", color: "#fff", borderRadius: "999px",
+        padding: "11px 18px", font: "700 13px 'Noto Sans KR'", cursor: canSubmit ? "pointer" : "default",
+        whiteSpace: "nowrap", userSelect: "none" },
+      clearSel: () => this.setState({ selId: null, memIdx: null }),
+      warm: () => sel && this.setState(s => s.warmed[warmKey] ? s : { warmed: { ...s.warmed, [warmKey]: true } }),
+      zoomIn: () => this.setState(s => ({ zoom: Math.min(2, +(s.zoom + 0.2).toFixed(2)) })),
+      zoomOut: () => this.setState(s => ({ zoom: Math.max(1, +(s.zoom - 0.2).toFixed(2)) })),
+      resetView: () => this.setState({ cats: { food: true, culture: true, life: true, view: true }, course: null, zoom: 1 }),
+      openForm: () => this.setState({ formOpen: true }),
+      closeForm: () => this.setState({ formOpen: false }),
+      goInbox: () => this.setState({ view: "inbox", toast: "" }),
+      setPlace: e => this.setState({ formPlace: e.target.value }),
+      setStory: e => this.setState({ formStory: e.target.value }),
+      submitForm: () => {
+        if (!canSubmit) return;
+        this.setState(s => ({ formOpen: false, formPlace: "", formStory: "",
+          inbox: [{ cat: s.formCat, place: s.formPlace, story: s.formStory, date: "방금" }, ...s.inbox],
+          toast: "제보함에 보관했어요 · 눌러서 제보함 보기" }));
+        clearTimeout(this._t);
+        this._t = setTimeout(() => this.setState({ toast: "" }), 4000);
+      }
+    };
+  }
+}
+</script>
+</body>
+</html>
