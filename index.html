@@ -147,43 +147,6 @@ a{color:#E06A50}a:hover{color:#c4543b}
           <div onClick="{{ sel.toggleFav }}" style="{{ sel.favBtnStyle }}" style-hover="border-color:#E0B9AB">{{ sel.favIcon }} {{ sel.favText }}</div>
         </div>
 
-        <sc-if value="{{ sel.showVisitPrompt }}" hint-placeholder-val="{{ true }}">
-          <div onClick="{{ sel.openVisit }}" style="margin-top:8px;border:1px dashed #DED6C6;border-radius:14px;padding:11px 13px;display:flex;align-items:center;gap:9px;cursor:pointer;background:#FCFAF4" style-hover="border-color:#C9B8A0">
-            <span style="font-size:15px">📍</span>
-            <div style="font:600 12.5px 'Noto Sans KR';color:#6E675A">다녀왔어요 · 내 방문 기록 남기기</div>
-          </div>
-        </sc-if>
-
-        <sc-if value="{{ sel.showVisitForm }}" hint-placeholder-val="{{ false }}">
-          <div style="margin-top:8px;border:1px solid #E3DCCC;border-radius:16px;padding:13px;background:#FFFDF8;animation:fade .2s both">
-            <div style="font:700 12.5px 'Noto Sans KR';color:#2E2A24">내 방문 기록</div>
-            <div onClick="{{ sel.toggleVisitPhoto }}" style="{{ sel.visitPhotoBoxStyle }}">{{ sel.visitPhotoText }}</div>
-            <textarea value="{{ sel.visitNoteVal }}" onChange="{{ sel.setVisitNote }}" placeholder="이 장소에서의 나만의 경험이나 추억을 적어보세요." rows="3" style="margin-top:8px;width:100%;border:1px solid #E3DCCC;border-radius:11px;padding:9px 11px;font:400 12.5px/1.7 'Noto Sans KR';color:#2E2A24;background:#FFF;outline:none;resize:none"></textarea>
-            <div style="margin-top:9px;display:flex;gap:8px;justify-content:flex-end">
-              <div onClick="{{ sel.closeVisit }}" style="border-radius:999px;padding:8px 14px;font:600 12px 'Noto Sans KR';color:#8A8474;cursor:pointer">취소</div>
-              <div onClick="{{ sel.saveVisit }}" style="{{ sel.saveVisitStyle }}">저장</div>
-            </div>
-          </div>
-        </sc-if>
-
-        <sc-if value="{{ sel.showVisitSummary }}" hint-placeholder-val="{{ false }}">
-          <div style="margin-top:8px;border:1px solid #EDE6D8;border-radius:16px;padding:12px 13px;background:#FFF">
-            <div style="display:flex;align-items:center;gap:7px">
-              <span style="font-size:13px">✅</span>
-              <div style="font:700 12.5px 'Noto Sans KR';color:#2E2A24;flex:1">내가 다녀온 장소</div>
-              <span style="font:400 10.5px 'Noto Sans KR';color:#9A9384">{{ sel.visitDate }}</span>
-            </div>
-            <sc-if value="{{ sel.visitHasPhoto }}" hint-placeholder-val="{{ false }}">
-              <div style="margin-top:8px;height:60px;border-radius:10px;background:repeating-linear-gradient(135deg,#F8F4EA 0 8px,#F1ECE0 8px 16px);display:flex;align-items:center;justify-content:center;font:500 10px 'Noto Sans KR';color:#A39B8B">내가 찍은 사진</div>
-            </sc-if>
-            <div style="{{ sel.visitNoteStyle }}">{{ sel.visitNoteText }}</div>
-            <div style="margin-top:8px;display:flex;gap:12px">
-              <div onClick="{{ sel.openVisit }}" style="font:600 11.5px 'Noto Sans KR';color:#8A8474;cursor:pointer">수정</div>
-              <div onClick="{{ sel.removeVisit }}" style="font:600 11.5px 'Noto Sans KR';color:#C9553A;cursor:pointer">삭제</div>
-            </div>
-          </div>
-        </sc-if>
-
         <sc-if value="{{ showList }}" hint-placeholder-val="{{ false }}">
           <div style="margin-top:12px;animation:fade .25s both">
             <div style="display:flex;align-items:baseline;gap:7px;margin-bottom:8px">
@@ -579,7 +542,7 @@ class Component extends DCLogic {
     cats: { food: true, culture: true, life: true, view: true },
     course: null, formOpen: false, formCat: "culture", formPlace: "", formStory: "",
     toast: "", inbox: SEED_INBOX, mw: 0, mh: 0,
-    favorites: {}, visits: {}, visitDraft: null, visitNote: "", visitPhoto: false
+    favorites: {}
   };
 
   attach() {
@@ -754,9 +717,6 @@ class Component extends DCLogic {
     const courseOf = sel && sel.course ? COURSES.find(x => x.id === sel.course) : null;
 
     const isFav = sel && !!st.favorites[sel.id];
-    const visitRec = sel && st.visits[sel.id];
-    const draftOpen = sel && st.visitDraft === sel.id;
-    const canSaveVisit = st.visitNote.trim().length > 0 || st.visitPhoto;
 
     const favPlaces = PLACES.filter(p => st.favorites[p.id]).map(p => ({
       name: p.name, count: p.memories.length,
@@ -805,28 +765,7 @@ class Component extends DCLogic {
         favBtnStyle: { display: "flex", alignItems: "center", gap: "6px", border: "1px solid " + (isFav ? "#F2C14E" : "#E3DCCC"),
           borderRadius: "999px", padding: "8px 13px", font: "600 12px 'Noto Sans KR'", color: isFav ? "#9A7415" : "#8A8474",
           background: isFav ? "#FCF3E0" : "#FFF", cursor: "pointer", userSelect: "none", width: "fit-content" },
-        toggleFav: () => this.setState(s => { const f = { ...s.favorites }; if (f[sel.id]) delete f[sel.id]; else f[sel.id] = true; return { favorites: f }; }),
-        showVisitPrompt: !visitRec && !draftOpen,
-        showVisitForm: !!draftOpen,
-        showVisitSummary: !!visitRec && !draftOpen,
-        openVisit: () => this.setState({ visitDraft: sel.id, visitNote: visitRec ? visitRec.note : "", visitPhoto: visitRec ? visitRec.photo : false }),
-        closeVisit: () => this.setState({ visitDraft: null }),
-        toggleVisitPhoto: () => this.setState(s => ({ visitPhoto: !s.visitPhoto })),
-        visitNoteVal: st.visitNote,
-        setVisitNote: e => this.setState({ visitNote: e.target.value }),
-        visitPhotoBoxStyle: { marginTop: "8px", height: "64px", borderRadius: "12px", border: "2px dashed " + (st.visitPhoto ? "#D9A98C" : "#DED6C6"),
-          background: st.visitPhoto ? "#FCEDE3" : "repeating-linear-gradient(135deg,#F8F4EA 0 8px,#F1ECE0 8px 16px)",
-          display: "flex", alignItems: "center", justifyContent: "center", font: "500 11px 'Noto Sans KR'",
-          color: st.visitPhoto ? "#B5673F" : "#A39B8B", cursor: "pointer", userSelect: "none" },
-        visitPhotoText: st.visitPhoto ? "📷 내 사진 추가됨 · 눌러서 취소" : "📷 내가 찍은 사진 추가하기",
-        saveVisit: () => { if (!canSaveVisit) return; this.setState(s => ({ visits: { ...s.visits, [sel.id]: { note: s.visitNote.trim(), photo: s.visitPhoto, date: "방금" } }, visitDraft: null })); },
-        saveVisitStyle: { background: canSaveVisit ? "#2E2A24" : "#C9C2B4", color: "#fff", borderRadius: "999px",
-          padding: "8px 16px", font: "700 12px 'Noto Sans KR'", cursor: canSaveVisit ? "pointer" : "default", userSelect: "none" },
-        visitDate: visitRec ? visitRec.date : "",
-        visitHasPhoto: visitRec ? !!visitRec.photo : false,
-        visitNoteText: visitRec ? visitRec.note : "",
-        visitNoteStyle: { marginTop: "8px", font: "400 12.5px/1.7 'Noto Sans KR'", color: "#544D42", whiteSpace: "pre-wrap", wordBreak: "keep-all" },
-        removeVisit: () => this.setState(s => { const v2 = { ...s.visits }; delete v2[sel.id]; return { visits: v2 }; })
+        toggleFav: () => this.setState(s => { const f = { ...s.favorites }; if (f[sel.id]) delete f[sel.id]; else f[sel.id] = true; return { favorites: f }; })
       } : { inCourse: false },
       backToList: () => this.setState({ memIdx: null }),
       courseOn: !!st.course, courseName: st.course ? COURSES.find(x => x.id === st.course).name : "",
